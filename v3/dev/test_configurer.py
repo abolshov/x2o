@@ -1,6 +1,6 @@
 import argparse
 import os
-from x2o3_configurer import x2o3_onfigurer
+from x2o3_configurer import x2o3_configurer
 
 
 def main():

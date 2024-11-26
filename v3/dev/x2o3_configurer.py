@@ -75,9 +75,9 @@ def parse_table(table):
     return result
 
 
-firmware_file_map = {"csc":"/root/gem/fw/csc_x2o-v5.0.3-60B3805-dirty_X2O_v3_full/csc_x2o-v5.0.3-60B3805-dirty.dat"
-                     "ge11":"/root/gem/fw/ge11_x2o-v5.0.3-60B3805-dirty_X2O_v3_SLR0_full/ge11_x2o-v5.0.3-60B3805-dirty.bit"
-                     "ge21":"/root/gem/fw/ge21_x2o-v5.0.3-D7AB225-dirty_v3_full_4_SLR_8_OH/ge21_x2o-v5.0.3-D7AB225-dirty.bit"
+firmware_file_map = {"csc":"/root/gem/fw/csc_x2o-v5.0.3-60B3805-dirty_X2O_v3_full/csc_x2o-v5.0.3-60B3805-dirty.dat",
+                     "ge11":"/root/gem/fw/ge11_x2o-v5.0.3-60B3805-dirty_X2O_v3_SLR0_full/ge11_x2o-v5.0.3-60B3805-dirty.bit",
+                     "ge21":"/root/gem/fw/ge21_x2o-v5.0.3-D7AB225-dirty_v3_full_4_SLR_8_OH/ge21_x2o-v5.0.3-D7AB225-dirty.bit",
                      "me0":"/root/gem/fw/ge21_x2o-v5.0.3-D7AB225-dirty_v3_full_4_SLR_8_OH/ge21_x2o-v5.0.3-D7AB225-dirty.bit"}
 
 clk_cfg_map = {40: '/root/gem/clk_config/DPLLandAPLL2_Input_40p0786_Out0_40p0786_OutOthers_160p3144_ZDM_EN_in_REF1.txt',
@@ -126,7 +126,7 @@ class x2o3_configurer():
     def monitor(self):
         proc = subprocess.Popen("x2o octopus monitor",
                                 shell=True, 
-                                executable="/bin/bash"
+                                executable="/bin/bash",
                                 stdout=subprocess.PIPE,  # Captures the standard output
                                 stderr=subprocess.PIPE)
         proc.wait()
