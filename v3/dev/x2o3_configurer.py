@@ -75,28 +75,6 @@ def parse_table(table):
     return result
 
 
-def compare_conditions(target, measured):
-    if set(target.keys()) != set(measured.keys()):
-        print("GOT CONFLICTING LIST OF DEVICES!")
-        self.power_down()
-        sys.exit(-1)
-
-    for device, measured_params in measured.items():
-        target_params = target[device]
-
-        # loop over V, I, P, T and measured values
-        for quantity, values in measured_params.items():
-            min_spec, max_spec = target_params[quantity]
-            # loop over each measured value and compare it with allowed
-            for val in values:
-                if val < min_spec or val > max_spec:
-                    print(f"ACHTUNG! DEVICE {device} HAS QUANTITY {quantity} OUTSIDE OF ALLOWED RANGE, SHUTTING BOARD DOWN")
-                    self.power_down()
-                    sys.exit(-1)
-
-    print("ALL CHECKS SUCCESSFULLY DONE!")
-
-
 firmware_file_map = {"csc":"/root/gem/fw/csc_x2o-v5.0.3-60B3805-dirty_X2O_v3_full/csc_x2o-v5.0.3-60B3805-dirty.dat"
                      "ge11":"/root/gem/fw/ge11_x2o-v5.0.3-60B3805-dirty_X2O_v3_SLR0_full/ge11_x2o-v5.0.3-60B3805-dirty.bit"
                      "ge21":"/root/gem/fw/ge21_x2o-v5.0.3-D7AB225-dirty_v3_full_4_SLR_8_OH/ge21_x2o-v5.0.3-D7AB225-dirty.bit"
@@ -166,6 +144,7 @@ class x2o3_configurer():
 
         print("")
         print("MONITORING DONE!")
+        return monitoring_result
 
 
     def config_clock(self):
@@ -182,7 +161,7 @@ class x2o3_configurer():
         print("CLOCK CONFIGURATION DONE!") 
 
 
-    def program_FPGA(self):
+    def program_fpga(self):
         load_cmd = "load_bitstream_top" if self.fw_file.endswith("bit") else "load_bitstream_top_decoded" if self.fw_file.endswith("dat") else None
 
         if load_cmd is None:
@@ -197,3 +176,27 @@ class x2o3_configurer():
 
         print("")
         print("PROGRAMMING FPGA DONE!")
+
+
+    def read_fpga_mod_sensors(self):
+        monitoring_result = self.monitor()
+
+        if set(target.keys()) != set(monitoring_result.keys()):
+            print("GOT CONFLICTING LIST OF DEVICES!")
+            self.power_down()
+            sys.exit(-1)
+
+        for device, measured_params in monitoring_result.items():
+            target_params = target[device]
+
+            # loop over V, I, P, T and measured values
+            for quantity, values in measured_params.items():
+                min_spec, max_spec = target_params[quantity]
+                # loop over each measured value and compare it with allowed
+                for val in values:
+                    if val < min_spec or val > max_spec:
+                        print(f"ACHTUNG! DEVICE {device} HAS QUANTITY {quantity} OUTSIDE OF ALLOWED RANGE, SHUTTING BOARD DOWN")
+                        self.power_down()
+                        sys.exit(-1)
+
+        print("ALL CHECKS SUCCESSFULLY DONE!")
