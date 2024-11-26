@@ -7,7 +7,7 @@ from dumbo.i2c import *
 from dumbo.bitstream import bscan 
 
 
-dummy = {'V': (-1.0, 200.0), 'I': (0, 30.0), 'P': (0.0, 6000.0), 'T': (-1.0, 1000.0)}
+dummy = {'V': (-1.0, 200.0), 'I': (-1.0, 30.0), 'P': (-1.0, 6000.0), 'T': (-1.0, 1000.0)}
 
 '''
 device : list [V, I, P, T] of tuples (min, max) for each parameter
