@@ -13,7 +13,7 @@ dummy = {'V': (-1.0, 200.0), 'I': (0, 30.0), 'P': (0.0, 6000.0), 'T': (-1.0, 100
 device : list [V, I, P, T] of tuples (min, max) for each parameter
 '''
 conditions_dict = {
-    "12V0" : {},
+    "12V0" : dummy,
     "3V3_STANDBY": dummy,
     "1V8_MACHXO2": dummy,
     "2V5_OSC_NE": {'V': (2.504, 2.506), 'I': (0, 30.0), 'P': (0.0, 75.18), 'T': (-1.0, 1000.0)},
