@@ -30,7 +30,10 @@ def main():
     conf.config_clock()
 
     print(f"Programming FPGA: {board_type}")
-    conf.program_FPGA()
+    conf.program_fpga()
+
+    print("Reading FPGA sensors:")
+    conf.read_fpga_mod_sensors()
 
     print("Powering down the board:")
     conf.power_down()

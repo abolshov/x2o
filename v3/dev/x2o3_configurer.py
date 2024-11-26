@@ -190,10 +190,10 @@ class x2o3_configurer():
             target_params = target[device]
 
             # loop over V, I, P, T and measured values
-            for quantity, values in measured_params.items():
+            for quantity, measured_values in measured_params.items():
                 min_spec, max_spec = target_params[quantity]
                 # loop over each measured value and compare it with allowed
-                for val in values:
+                for val in measured_values:
                     if val < min_spec or val > max_spec:
                         print(f"ACHTUNG! DEVICE {device} HAS QUANTITY {quantity} OUTSIDE OF ALLOWED RANGE, SHUTTING BOARD DOWN")
                         self.power_down()
