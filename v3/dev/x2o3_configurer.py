@@ -63,26 +63,38 @@ def parse_table(table):
 
             # Remove units from values and convert to float where applicable
             def clean_value(value, unit):
-                return float(value.replace(unit, "")) if value else None
+                return [float(value.replace(unit, ""))] if value else []
 
             result[device] = {
                 "V": clean_value(v, " V"),
                 "I": clean_value(i, " A"),
                 "P": clean_value(p, " W"),
-                "T": [float(temp.replace(" C", "")) for temp in t.split(",")] if t else None
+                "T": [float(temp.replace(" C", "")) for temp in t.split(",")] if t else []
             }
 
     return result
 
 
 def compare_conditions(target, measured):
-    if target.keys() != measured.keys():
+    if set(target.keys()) != set(measured.keys()):
         print("GOT CONFLICTING LIST OF DEVICES!")
         self.power_down()
         sys.exit(-1)
 
     for device, measured_params in measured.items():
         target_params = target[device]
+
+        # loop over V, I, P, T and measured values
+        for quantity, values in measured_params.items():
+            min_spec, max_spec = target_params[quantity]
+            # loop over each measured value and compare it with allowed
+            for val in values:
+                if val < min_spec or val > max_spec:
+                    print(f"ACHTUNG! DEVICE {device} HAS QUANTITY {quantity} OUTSIDE OF ALLOWED RANGE, SHUTTING BOARD DOWN")
+                    self.power_down()
+                    sys.exit(-1)
+
+    print("ALL CHECKS SUCCESSFULLY DONE!")
 
 
 firmware_file_map = {"csc":"/root/gem/fw/csc_x2o-v5.0.3-60B3805-dirty_X2O_v3_full/csc_x2o-v5.0.3-60B3805-dirty.dat"
