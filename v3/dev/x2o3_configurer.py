@@ -101,11 +101,23 @@ class x2o3_configurer():
         
         
     def monitor(self):
-        proc = subprocess.Popen("x2o octopus monitor", shell=True, executable="/bin/bash")
+        proc = subprocess.Popen("x2o octopus monitor",
+                                shell=True, 
+                                executable="/bin/bash"
+                                stdout=subprocess.PIPE,  # Captures the standard output
+                                stderr=subprocess.PIPE)
         proc.wait()
 
-        table = "this is supposed to be a string returned from monitor"
-        monitoring_result = parse_table(table)
+        stdout, stderr = proc.communicate()
+
+        # Decode the output (since it's in bytes) into a string
+        output = stdout.decode('utf-8').strip()  # Adjust 'utf-8' if your encoding is different
+        error = stderr.decode('utf-8').strip()
+
+        print(output)
+        print(error)
+
+        monitoring_result = parse_table(output)
 
         print("")
         print("MONITORING DONE!")
