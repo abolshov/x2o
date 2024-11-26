@@ -89,7 +89,7 @@ class x2o3_configurer():
         # path to clock config file
         self.clk_cfg = clk_cfg_map[clk_freq]
         # file with firmware to be loaded to x2o 
-        self.fw_file = fpga_map[board_type]
+        self.firmware_file_map = fpga_map[board_type]
         # verbosity level of monitoring routine
         self.verbosity = verbosity
 
@@ -181,13 +181,13 @@ class x2o3_configurer():
     def read_fpga_mod_sensors(self):
         monitoring_result = self.monitor()
 
-        if set(target.keys()) != set(monitoring_result.keys()):
+        if set(conditions_dict.keys()) != set(monitoring_result.keys()):
             print("GOT CONFLICTING LIST OF DEVICES!")
             self.power_down()
             sys.exit(-1)
 
         for device, measured_params in monitoring_result.items():
-            target_params = target[device]
+            target_params = conditions_dict[device]
 
             # loop over V, I, P, T and measured values
             for quantity, measured_values in measured_params.items():
