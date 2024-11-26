@@ -3,13 +3,14 @@ import re
 
 def parse_table(table):  
     """
-    Parses a table and extracts rows containing words (letters, digits, underscores, and hyphens).
+    Parses a table and extracts rows containing words (letters, digits, underscores, and hyphens),
+    mapping each key to a list of values.
 
     Args:
         table (str): The input table as a string.
 
     Returns:
-        dict: A dictionary where keys are row names and values are dictionaries with parameters (V, I, P, T).
+        dict: A dictionary where keys are row names and values are dictionaries mapping parameters (V, I, P, T) to lists of values.
     """
     result = {}
 
@@ -23,7 +24,7 @@ def parse_table(table):
         (?P<I>[+-]?[\d.]+\sA)?\s*     # Current (optional)
         (?P<P>[+-]?[\d.]+\sW)?\s*     # Power (optional)
         (?P<T>(\d+\.\d+\sC(?:,\s*\d+\.\d+\sC)*))?$  # Temperature(s) (optional)
-        """, re.VERBOSE)
+    """, re.VERBOSE)
 
     for line in lines:
         if line.strip() == "":
@@ -39,13 +40,13 @@ def parse_table(table):
 
             # Remove units from values and convert to float where applicable
             def clean_value(value, unit):
-                return float(value.replace(unit, "")) if value else None
+                return [float(value.replace(unit, ""))] if value else []
 
             result[device] = {
                 "V": clean_value(v, " V"),
                 "I": clean_value(i, " A"),
                 "P": clean_value(p, " W"),
-                "T": [float(temp.replace(" C", "")) for temp in t.split(",")] if t else None
+                "T": [float(temp.replace(" C", "")) for temp in t.split(",")] if t else []
             }
 
     return result
