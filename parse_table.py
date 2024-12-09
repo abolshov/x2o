@@ -1,7 +1,7 @@
 import re
 
 
-def parse_table(table):  
+def parse_monitor_table_v2(table):  
     """
     Parses a table and extracts rows containing words (letters, digits, underscores, and hyphens),
     mapping each key to a list of values.
@@ -52,7 +52,7 @@ def parse_table(table):
     return result
 
 
-table = """--------------------------------------------------------------------------------------------------------------
+table_v2 = """--------------------------------------------------------------------------------------------------------------
 Device              	V		I		P		T
 12V0                	0.845 V		          		          
 3V3_STANDBY         	3.299 V		          		          
@@ -78,6 +78,118 @@ VIRTEXUPLUS         	         	          	-0.00 W		22.8 C,25.4 C
 
 """
 
-res = parse_table(table)
+
+def parse_monitor_table_v3(table):
+    """
+    Parses a table in the *MONITOR* format.
+
+    Args:
+        table (str): The input table as a string.
+
+    Returns:
+        dict: A dictionary where keys are row names and values are dictionaries with parameters (V, I, P, Tlocal, Tremote).
+    """
+    result = {}
+
+    # Define regex to match rows with values in the *MONITOR* format
+    row_pattern = re.compile(r"""
+        ^(?P<name>[^\s]+)\s+               # Name of the device (non-whitespace characters)
+        (?P<V>\d+\.\d+|-)\s+               # Voltage (or - for none)
+        (?P<I>\d+\.\d+|-)\s+               # Current (or - for none)
+        (?P<P>\d+\.\d+|-)\s+               # Power (or - for none)
+        (?P<T>[\d\.\,\s-]*)$
+    """, re.VERBOSE)
+
+    for line in table.splitlines():
+        match = row_pattern.match(line)
+        if match:
+            name = match.group("name")
+            v = match.group("V")
+            i = match.group("I")
+            p = match.group("P")
+            t = match.group("T")
+
+            # Clean and convert values to lists
+            def clean_value(value):
+                symbols = [c[:-1] if c.endswith(',') else c for c in value.strip().split(' ') if c != '']
+                res = []
+                for sym in symbols:
+                    if sym == '-':
+                        continue
+                    else:
+                        res.append(float(sym))
+                return res
+
+
+            result[name] = {
+                "V": [float(v)] if v != "-" else [],
+                "I": [float(i)] if i != "-" else [],
+                "P": [float(p)] if p != "-" else [],
+                "T": clean_value(t)
+            }
+
+    return result
+
+# Example table input
+table_v3 = """
+*MONITOR*
+Name                     V         I         P         Tlocal                   Tremote                  
+=========================================================================================================
+0V85_VCCINT_VUP          0.85      0.52      6.30      24.62, 25.12, 25.47      30.53, 31.31, 31.09      
+0V9_MGTAVCC_VUP_N        0.90      0.12      1.47      23.69, 23.25             25.75, 25.44             
+0V9_MGTAVCC_VUP_S        0.90      0.12      1.47      23.44, 23.12             25.75, 25.44             
+12V0                     12.04     -         -         -                        -                        
+1V2_MGTAVTT_VUP_N        1.20      0.14      1.66      24.75, 24.06             27.56, 26.81             
+1V2_MGTAVTT_VUP_S        1.20      0.13      1.60      23.88, 23.69             27.31, 27.19             
+1V8_MACHXO2              1.78      -         -         -                        -                        
+1V8_MGTVCCAUX_VUP_N      1.81      -         -         -                        -                        
+1V8_MGTVCCAUX_VUP_S      1.81      -         -         -                        -                        
+1V8_VCCAUX_VUP           1.79      1.02      3.52      -                        -                        
+2V5_OSC_NE               2.48      -         -         -                        -                        
+2V5_OSC_NW               2.48      -         -         -                        -                        
+2V5_OSC_SE               2.48      -         -         -                        -                        
+2V5_OSC_SW               2.48      -         -         -                        -                        
+3V3_LMK                  3.22      -         -         -                        -                        
+3V3_STANDBY              3.30      -         -         -                        -                        
+3V5_INTERMEDIATE         3.39      0.00      0.00      25.38                    32.25                    
+---------------------------------------------------------------------------------------------------------
+VIRTEXUPLUS              -         -         16.03     23.06                    25.94                    
+---------------------------------------------------------------------------------------------------------
+BOARD POWER:             -         -         16.03     -                        -
+"""
+
+table_v3 = """
+*MONITOR*
+Name                     V         I         P         Tlocal                   Tremote                  
+=========================================================================================================
+0V85_VCCINT_VUP          0.85      0.52      6.30      -                        -
+0V9_MGTAVCC_VUP_N        0.90      0.12      1.47      -                        -               
+0V9_MGTAVCC_VUP_S        0.90      0.12      1.47      23.44, 23.12, 24.06      25.75           
+12V0                     12.04     -         -         -                        -                        
+1V2_MGTAVTT_VUP_N        1.20      0.14      1.66      24.75, 24.06             27.56, 26.81             
+1V2_MGTAVTT_VUP_S        1.20      0.13      1.60      23.88, 23.69             27.31, 27.19             
+1V8_MACHXO2              1.78      -         -         -                        -                        
+1V8_MGTVCCAUX_VUP_N      1.81      -         -         -                        -                        
+1V8_MGTVCCAUX_VUP_S      1.81      -         -         -                        -                        
+1V8_VCCAUX_VUP           1.79      1.02      3.52      -                        -                        
+2V5_OSC_NE               2.48      -         -         -                        -                        
+2V5_OSC_NW               2.48      -         -         -                        -                        
+2V5_OSC_SE               2.48      -         -         -                        -                        
+2V5_OSC_SW               2.48      -         -         -                        -                        
+3V3_LMK                  3.22      -         -         -                        -                        
+3V3_STANDBY              3.30      -         -         -                        -                        
+3V5_INTERMEDIATE         3.39      0.00      0.00      25.38                    32.25                    
+---------------------------------------------------------------------------------------------------------
+VIRTEXUPLUS              -         -         16.03     23.06                    25.94                    
+---------------------------------------------------------------------------------------------------------
+BOARD POWER:             -         -         16.03     -                        -
+"""
+
+# Parse and print the result
+res = parse_monitor_table_v2(table_v2)
+# print(res)
+
+
+# res = parse_table(table)
 for key, val in res.items():
     print(f"{key}: {val}")
