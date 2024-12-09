@@ -34,42 +34,44 @@ conditions_dict = {
 }
 
 
-def parse_table(table):  
+def parse_table(table):
     result = {}
 
-    # Split the table into lines
-    lines = table.splitlines()
-
-    # Define regex to match rows with words in the first column
+    # Define regex to match rows with values in the *MONITOR* format
     row_pattern = re.compile(r"""
-        ^(?P<device>[\w\-]+)\s+        # Device name (words)
-        (?P<V>[+-]?[\d.]+\sV)?\s*     # Voltage (optional)
-        (?P<I>[+-]?[\d.]+\sA)?\s*     # Current (optional)
-        (?P<P>[+-]?[\d.]+\sW)?\s*     # Power (optional)
-        (?P<T>(\d+\.\d+\sC(?:,\s*\d+\.\d+\sC)*))?$  # Temperature(s) (optional)
+        ^(?P<name>[^\s]+)\s+               # Name of the device (non-whitespace characters)
+        (?P<V>\d+\.\d+|-)\s+               # Voltage (or - for none)
+        (?P<I>\d+\.\d+|-)\s+               # Current (or - for none)
+        (?P<P>\d+\.\d+|-)\s+               # Power (or - for none)
+        (?P<T>[\d\.\,\s-]*)$
     """, re.VERBOSE)
 
-    for line in lines:
-        if line.strip() == "":
-            continue
-
+    for line in table.splitlines():
         match = row_pattern.match(line)
         if match:
-            device = match.group("device")
+            name = match.group("name")
             v = match.group("V")
             i = match.group("I")
             p = match.group("P")
             t = match.group("T")
 
-            # Remove units from values and convert to float where applicable
-            def clean_value(value, unit):
-                return [float(value.replace(unit, ""))] if value else []
+            # Clean and convert values to lists
+            def clean_value(value):
+                symbols = [c[:-1] if c.endswith(',') else c for c in value.strip().split(' ') if c != '']
+                res = []
+                for sym in symbols:
+                    if sym == '-':
+                        continue
+                    else:
+                        res.append(float(sym))
+                return res
 
-            result[device] = {
-                "V": clean_value(v, " V"),
-                "I": clean_value(i, " A"),
-                "P": clean_value(p, " W"),
-                "T": [float(temp.replace(" C", "")) for temp in t.split(",")] if t else []
+
+            result[name] = {
+                "V": [float(v)] if v != "-" else [],
+                "I": [float(i)] if i != "-" else [],
+                "P": [float(p)] if p != "-" else [],
+                "T": clean_value(t)
             }
 
     return result
@@ -195,7 +197,8 @@ class x2o3_configurer():
                 # loop over each measured value and compare it with allowed
                 for val in measured_values:
                     if val < min_spec or val > max_spec:
-                        print(f"ACHTUNG! DEVICE {device} HAS QUANTITY {quantity} OUTSIDE OF ALLOWED RANGE, SHUTTING BOARD DOWN")
+                        print(f"ACHTUNG! DEVICE {device} HAS QUANTITY {quantity}={val}, NOT IN [{min_spec}, {max_spec}]")
+                        print("SHUTTING BOARD DOWN")
                         self.power_down()
                         sys.exit(-1)
 
