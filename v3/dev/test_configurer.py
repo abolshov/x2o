@@ -29,8 +29,8 @@ def main():
     print(f"Confugring clock: frequency {freq} MHz")
     conf.config_clock()
 
-    print(f"Programming FPGA: {board_type}")
-    conf.program_fpga()
+    #print(f"Programming FPGA: {board_type}")
+    #conf.program_fpga()
 
     print("Reading FPGA sensors:")
     conf.read_fpga_mod_sensors()

@@ -23,7 +23,7 @@ conditions_dict = {
     "2V5_OSC_SW": {'V': (2.512, 2.514), 'I': (0, 30.0), 'P': (0.0, 75.42), 'T': (-1.0, 1000.0)},
     "2V5_OSC_SE": dummy,
     "3V3_LMK": dummy,
-    "0V9_MGTAVCC_VUP_N": {'V': (0.89, 0.9), 'I': (0.150, 0.154), 'P': (0.133, 0.138), 'T': (-1.0, 1000.0)},
+    "0V9_MGTAVCC_VUP_N": {'V': (0.89, 0.9), 'I': (0.15, 0.154), 'P': (0.133, 0.138), 'T': (-1.0, 1000.0)},
     "1V8_VCCAUX_VUP": {'V': (1.796, 1.799), 'I': (1.27, 1.28), 'P': (2.28092, 2.30272), 'T': (-1.0, 1000.0)},
     "1V2_MGTAVTT_VUP_N": {'V': (1.1942, 1.1944), 'I': (0.35, 0.37), 'P': (0.41797, 0.441928), 'T': (42.0, 51.0)},
     "3V5_INTERMEDIATE": {'V': (0.0, 5.0), 'I': (0.5, 0.6), 'P': (0.0, 30.0), 'T': (53.0, 63.0)},
@@ -91,7 +91,7 @@ class x2o3_configurer():
         # path to clock config file
         self.clk_cfg = clk_cfg_map[clk_freq]
         # file with firmware to be loaded to x2o 
-        self.firmware_file_map = fpga_map[board_type]
+        self.fw_file = firmware_file_map[board_type]
         # verbosity level of monitoring routine
         self.verbosity = verbosity
 
@@ -100,7 +100,7 @@ class x2o3_configurer():
             sys.exit(-1)
 
         self.i2cbus = bus(1)
-        self.octopus = octopus_rev2(i2cbus)
+        self.octopus = octopus_rev2(self.i2cbus)
 
 
     def power_up(self):
